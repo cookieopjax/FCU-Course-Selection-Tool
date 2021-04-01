@@ -1,11 +1,9 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LoadData {
   int year, //學年度 : 110、109、108
       sms, //學期 : 1(上學期)、2(下學期)、3(暑修上)、4(暑修下)
-      week, //週 : 1、2....、7
-      period, //節 : "*"代表全部，0、1、2、....、7
       specificSubjectValue; //1(通識)、2(體育)、3(國文)
 
   bool codeEnable, //是否指定選課代號
@@ -22,21 +20,23 @@ class LoadData {
       courseValue, //科目名稱
       teacherValue, //開課教師
       useLanguageValue, //授課語言
-      courseDescriptionValue; //課程描述
+      courseDescriptionValue, //課程描述
+      week, //週 : 1、2....、7
+      period; //節 : "*"代表全部，0、1、2、....、7
 
   LoadData({
     this.lang = "cht",
-    this.week = 1, //temp
-    this.period = 1, //temp
+    this.week = "*",
+    this.period = "*",
     this.year = 109,
     this.sms = 2,
     this.codeEnable = false,
-    this.weekPeriodEnable = true, //temp
+    this.weekPeriodEnable = false,
     this.courseEnable = false,
     this.teacherEnable = false,
     this.useEnglishEnable = false,
-    this.useLanguageEnable = true, //temp
-    this.specificSubjectEnable = true, //temp
+    this.useLanguageEnable = false,
+    this.specificSubjectEnable = false,
     this.courseDescriptionEnable = false,
     this.codeValue = "",
     this.courseValue = "",
@@ -47,9 +47,9 @@ class LoadData {
   });
 
   Future<String> getData() async {
-    var url = Uri.parse(
+    final url = Uri.parse(
         'https://coursesearch02.fcu.edu.tw/Service/Search.asmx/GetType2Result');
-    var payload = {
+    final payload = {
       "baseOptions": {"lang": lang, "year": year, "sms": sms},
       "typeOptions": {
         "code": {"enabled": codeEnable, "value": codeValue},
@@ -72,11 +72,10 @@ class LoadData {
         "courseDescription": {"enabled": courseEnable, "value": courseValue}
       }
     };
-    var header = {"Content-Type": "application/json"};
-    var body = json.encode(payload);
-    var response = await http.post(url, headers: header, body: body);
-    var data = json.decode(json.decode(response.body)['d']);
-    print(data.toString());
+    final header = {"Content-Type": "application/json"};
+    final body = json.encode(payload);
+    final response = await http.post(url, headers: header, body: body);
+    final data = json.decode(json.decode(response.body)['d'] as String);
     return data['items'].toString();
   }
 }
